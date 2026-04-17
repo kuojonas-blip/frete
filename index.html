@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cotação de Frete — Sinmag / JK</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div class="container">
+
+  <div class="topo-logo">
+    <img src="logo.png" alt="Sinmag Brasil" class="logo-sinmag" />
+  </div>
+  <h1>Gerador de Cotação de Frete</h1>
+
+  <!-- PDF Upload -->
+  <h2>Importar pedido (opcional)</h2>
+  <div class="pdf-zone" id="pdfZone">
+    <input type="file" id="pdfInput" accept=".pdf" />
+    <div style="font-size:28px;margin-bottom:6px">📄</div>
+    <h3>Carregar PDF do pedido</h3>
+    <p>Clique ou arraste · A IA extrai os dados automaticamente</p>
+  </div>
+  <div class="loading-bar" id="loadingBar" style="display:none">
+    <p>🤖 Lendo o pedido e extraindo informações…</p>
+    <div class="progress"><div class="progress-fill"></div></div>
+  </div>
+  <div class="pdf-ok" id="pdfOk" style="display:none">
+    <span>✓</span><span id="pdfOkText">PDF processado com sucesso.</span>
+  </div>
+
+  <!-- Remetente -->
+  <h2>Remetente (quem envia)</h2>
+  <div class="toggle-group">
+    <button class="toggle-btn active" id="btnJK" onclick="setRemetente('jk')">JK Equipamentos</button>
+    <button class="toggle-btn" id="btnSinmag" onclick="setRemetente('sinmag')">Sinmag Brasil</button>
+  </div>
+  <div class="info-box" id="remetenteBox">
+    <strong>JK Equipamentos Eletro Eletrônicos Ltda</strong><br>
+    CNPJ: 38.826.901/0001-00<br>
+    Rua Tailândia, N°152 — Vila Friburgo — São Paulo/SP — CEP: 04782-053
+  </div>
+
+  <!-- Modalidade -->
+  <h2>Modalidade de frete</h2>
+  <div style="display:flex;gap:10px">
+    <button class="fob-btn active" id="btnFOB" onclick="setFrete('FOB')">FOB</button>
+    <button class="fob-btn" id="btnCIF" onclick="setFrete('CIF')">CIF</button>
+  </div>
+
+  <!-- Destinatário -->
+  <h2>Destinatário</h2>
+  <div class="bloco">
+    <div class="campo span2">
+      <label>Razão Social / Nome <span class="req">*</span></label>
+      <input type="text" id="destNome" placeholder="ex: Flumo Ltda" />
+      <div class="error-msg">Campo obrigatório</div>
+    </div>
+    <div class="campo">
+      <label>CNPJ / CPF <span class="req">*</span></label>
+      <input type="text" id="destCNPJ" placeholder="00.000.000/0001-00" />
+      <div class="error-msg">Campo obrigatório</div>
+    </div>
+    <div class="campo">
+      <label>Contato (nome · telefone)</label>
+      <input type="text" id="destContato" placeholder="ex: Christian · (11) 99277-7051" />
+    </div>
+    <div class="campo span2">
+      <label>Endereço de entrega <span class="req">*</span></label>
+      <input type="text" id="destEndereco" placeholder="Rua, nº — Bairro — Cidade/UF — CEP" />
+      <div class="error-msg">Campo obrigatório</div>
+    </div>
+  </div>
+
+  <!-- Adicionar Equipamento -->
+  <h2>Adicionar equipamento</h2>
+  <div class="bloco col1">
+    <div class="campo">
+      <label>Descrição do equipamento <span class="req">*</span></label>
+      <div class="equip-wrap">
+        <input type="text" id="equipamento"
+          placeholder="Digite o modelo (ex: SM-370A) ou descrição…"
+          autocomplete="off"
+          oninput="filtrarEquip(this.value)"
+          onblur="setTimeout(fecharDropdown, 200)" />
+        <div class="equip-dropdown" id="equipDropdown"></div>
+      </div>
+      <div id="equipOk" class="equip-ok" style="display:none">
+        ✓ Medidas e peso preenchidos automaticamente (engradado)
+      </div>
+    </div>
+  </div>
+  <div class="bloco">
+    <div class="campo">
+      <label>Peso bruto (kg)</label>
+      <input type="number" id="peso" placeholder="ex: 120" min="0" step="0.1" />
+    </div>
+    <div class="campo">
+      <label>Qtd. de volumes</label>
+      <input type="number" id="volumes" value="1" min="1" />
+    </div>
+  </div>
+  <div class="bloco col3">
+    <div class="campo">
+      <label>Comprimento (m)</label>
+      <input type="text" id="dimC" placeholder="ex: 0,76" />
+    </div>
+    <div class="campo">
+      <label>Altura (m)</label>
+      <input type="text" id="dimA" placeholder="ex: 0,68" />
+    </div>
+    <div class="campo">
+      <label>Largura (m)</label>
+      <input type="text" id="dimL" placeholder="ex: 0,75" />
+    </div>
+  </div>
+  <div class="bloco">
+    <div class="campo">
+      <label>Valor da Nota Fiscal (R$)</label>
+      <input type="text" id="valorNF" placeholder="ex: 29.900,00" />
+    </div>
+    <div class="campo">
+      <label>Nº da NF</label>
+      <input type="text" id="numeroNF" placeholder="ex: 001234" />
+    </div>
+  </div>
+  <div class="bloco">
+    <div class="campo">
+      <label>Embalagem</label>
+      <select id="embalagem">
+        <option>Caixa de madeira</option>
+        <option>Caixote de madeira + strech</option>
+        <option>Papelão reforçado</option>
+        <option>Strech + pallet</option>
+        <option>Sem embalagem</option>
+      </select>
+    </div>
+    <div class="campo">
+      <label>Descarga no destino</label>
+      <select id="descarga">
+        <option>Com descarga</option>
+        <option>Com descarga e ajudante</option>
+        <option>Com descarga, ajudante e maquinário</option>
+        <option>Sem descarga (conta do destinatário)</option>
+      </select>
+    </div>
+  </div>
+
+  <button id="btnAdicionarEquip" type="button">Adicionar equipamento</button>
+
+  <!-- Tabela equipamentos -->
+  <h2>Equipamentos adicionados</h2>
+  <table id="tabelaEquip">
+    <thead>
+      <tr>
+        <th>Equipamento</th>
+        <th>Peso</th>
+        <th>Vol.</th>
+        <th>Dimensões (C×A×L)</th>
+        <th>Valor NF</th>
+        <th>NF nº</th>
+        <th>Embalagem</th>
+        <th>Descarga</th>
+        <th>Ação</th>
+      </tr>
+    </thead>
+    <tbody id="tabelaEquipBody"></tbody>
+  </table>
+
+  <!-- Referência -->
+  <h2>Referência interna</h2>
+  <div class="bloco">
+    <div class="campo">
+      <label>Pedido de Venda nº</label>
+      <input type="text" id="numPedido" placeholder="ex: 460" />
+    </div>
+    <div class="campo">
+      <label>Vendedor responsável</label>
+      <input type="text" id="vendedor" placeholder="ex: Marcelo" />
+    </div>
+  </div>
+
+  <div class="acoes">
+    <button class="btn-primary" onclick="gerarMensagem()">Gerar mensagem</button>
+    <button class="btn-ghost" onclick="limparForm()">Limpar tudo</button>
+  </div>
+
+  <!-- Preview -->
+  <div class="preview-wrap" id="previewWrap" style="display:none">
+    <div class="preview-top">
+      <span>Mensagem — WhatsApp</span>
+      <span id="charCount"></span>
+    </div>
+    <div class="preview-body" id="msgPreview"></div>
+    <div class="preview-acoes">
+      <button class="btn-wpp" onclick="abrirWhatsApp()">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+          <path d="M12 0C5.373 0 0 5.373 0 12c0 2.115.553 4.1 1.522 5.827L.057 23.943l6.255-1.438A11.94 11.94 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.891 0-3.655-.506-5.177-1.388l-.371-.219-3.849.885.924-3.76-.242-.386A9.96 9.96 0 0 1 2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/>
+        </svg>
+        Abrir no WhatsApp
+      </button>
+      <button class="btn-ghost" onclick="copiarMsg()">📋 Copiar mensagem</button>
+    </div>
+  </div>
+
+</div>
+<div class="toast" id="toast"></div>
+<script src="app.js"></script>
+</body>
+</html>
