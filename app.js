@@ -363,7 +363,7 @@ function toBase64(file) {
 // ══════════════════════════════════════════════════════
 // VALIDAÇÃO
 // ══════════════════════════════════════════════════════
-const OBRIGATORIOS_DEST = ["destNome", "destCNPJ", "destEndereco"];
+const OBRIGATORIOS_DEST = ["destNome", "destEndereco"];
 
 function validar() {
   let ok = true;
@@ -422,7 +422,7 @@ function gerarMensagem() {
   msg += `ENTREGA ${freteAtual}\n\n`;
   msg += `Destinatário:\n`;
   msg += `*${v("destNome")}*\n`;
-  msg += `CNPJ: ${v("destCNPJ")}\n`;
+  if (v("destCNPJ")) msg += `CNPJ/CPF: ${v("destCNPJ")}\n`;
   if (v("destContato")) msg += `Contato: ${v("destContato")}\n`;
   if (v("destEmail")) msg += `E-mail: ${v("destEmail")}\n`;
   msg += `Endereço para entrega: ${v("destEndereco")}\n`;

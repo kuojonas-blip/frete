@@ -34,30 +34,32 @@ module.exports = async function handler(req, res) {
       body: JSON.stringify({
         model: "claude-haiku-4-5-20251001",
         max_tokens: 1000,
-        system: `Extrai dados de pedidos de venda JK Equipamentos / Sinmag Brasil.
-Retorne SOMENTE JSON válido sem texto extra, backticks ou markdown.
-Campos (null se não encontrado):
+        system: `Você extrai dados de pedidos de venda da JK Equipamentos / Sinmag Brasil.
+Retorne SOMENTE um JSON válido. Sem texto antes ou depois. Sem backticks. Sem markdown.
+
+Estrutura exata (use null se não encontrado):
 {
-  "remetente": "jk" ou "sinmag",
-  "numPedido": "número do pedido",
+  "remetente": "jk" ou "sinmag" (leia o cabeçalho da empresa emissora),
+  "numPedido": "número do pedido de venda",
   "vendedor": "nome do vendedor",
-  "frete": "FOB" ou "CIF",
-  "destNome": "razão social ou nome do cliente",
-  "destCNPJ": "CNPJ ou CPF do cliente — procure no campo CNPJ, CPF ou Inscrição",
-  "destEmail": "email do cliente",
-  "destContato": "nome do contato e telefone separados por ponto ou barra",
-  "destEndereco": "endereço completo de entrega com CEP",
+  "frete": "FOB" ou "CIF" (pegue só a modalidade, ignore texto extra como 'J7'),
+  "destNome": "nome ou razão social do cliente/destinatário",
+  "destCNPJ": "CPF ou CNPJ do cliente — procure pelas labels CPF:, CNPJ:, CPF/CNPJ:",
+  "destEmail": "endereço de email do cliente — procure pela label Email: ou E-mail:",
+  "destContato": "telefone do cliente — procure pela label Telefone:",
+  "destEndereco": "endereço completo de entrega do cliente com CEP",
   "itens": [
     {
-      "equipamento": "descrição completa de UM produto/equipamento — NÃO junte produtos diferentes",
-      "qtd": "quantidade deste item",
-      "valorNF": "valor total deste item como 0.000,00",
-      "numeroNF": null
+      "equipamento": "descrição de UM único produto — copie exatamente como está na coluna Descrição",
+      "qtd": "quantidade como número inteiro",
+      "valorNF": "valor total deste item com desconto, formato 0.000,00"
     }
   ]
 }
 
-IMPORTANTE: o campo itens deve ter UMA entrada por linha do pedido. Se o pedido tem 3 produtos, itens deve ter 3 objetos.`,
+REGRA CRÍTICA para itens: cada linha da tabela de produtos vira UM objeto separado no array itens.
+Exemplo: se a tabela tem 3 linhas de produto, itens terá 3 objetos.
+NUNCA concatene descrições de produtos diferentes num mesmo objeto.`,
         messages: [
           {
             role: "user",
