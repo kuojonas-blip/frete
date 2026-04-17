@@ -297,37 +297,41 @@ async function processarPDF(file) {
     if (fields.frete === "CIF") setFrete("CIF"); else setFrete("FOB");
 
     // Destinatário e referência
-    ["numPedido", "vendedor", "destNome", "destCNPJ", "destContato", "destEndereco"].forEach((id) => {
+    ["numPedido", "vendedor", "destNome", "destCNPJ", "destEmail", "destContato", "destEndereco"].forEach((id) => {
       if (fields[id]) {
         const el = document.getElementById(id);
         if (el) { el.value = fields[id]; el.classList.add("auto-filled"); }
       }
     });
 
-    // Se tem equipamento, adiciona direto na tabela
-    if (fields.equipamento) {
-      // Tenta preencher medidas do catálogo
-      const q = norm(fields.equipamento);
+    // Adiciona itens do pedido direto na tabela
+    const itens = Array.isArray(fields.itens) && fields.itens.length > 0
+      ? fields.itens
+      : fields.equipamento ? [{ equipamento: fields.equipamento, qtd: fields.volumes || "1", valorNF: fields.valorNF || "", numeroNF: fields.numeroNF || "" }]
+      : [];
+
+    itens.forEach((it) => {
+      if (!it.equipamento) return;
+      const q = norm(it.equipamento);
       const match = EQUIPAMENTOS_CATALOGO.find(
         (e) => q.includes(norm(e.modelo)) || norm(e.desc).includes(q)
       );
-
       const item = {
-        desc:      fields.equipamento,
-        peso:      (match && match.peso) ? String(match.peso) : (fields.peso || ""),
-        volumes:   fields.volumes || "1",
-        dimC:      (match && match.c)    ? match.c : (fields.dimC || ""),
-        dimA:      (match && match.a)    ? match.a : (fields.dimA || ""),
-        dimL:      (match && match.l)    ? match.l : (fields.dimL || ""),
-        valorNF:   fields.valorNF || "",
-        numeroNF:  fields.numeroNF || "",
+        desc:      it.equipamento,
+        peso:      (match && match.peso) ? String(match.peso) : "",
+        volumes:   it.qtd || "1",
+        dimC:      (match && match.c) ? match.c : "",
+        dimA:      (match && match.a) ? match.a : "",
+        dimL:      (match && match.l) ? match.l : "",
+        valorNF:   it.valorNF || "",
+        numeroNF:  it.numeroNF || "",
         embalagem: "Caixa de madeira",
         descarga:  "Com descarga",
       };
-
       equipamentos.push(item);
-      renderTabela();
-    }
+    });
+
+    if (itens.length > 0) renderTabela();
 
     // Mensagem de sucesso
     pdfOk.style.cssText = "";
@@ -420,6 +424,7 @@ function gerarMensagem() {
   msg += `*${v("destNome")}*\n`;
   msg += `CNPJ: ${v("destCNPJ")}\n`;
   if (v("destContato")) msg += `Contato: ${v("destContato")}\n`;
+  if (v("destEmail")) msg += `E-mail: ${v("destEmail")}\n`;
   msg += `Endereço para entrega: ${v("destEndereco")}\n`;
 
   equipamentos.forEach(function (item, i) {
@@ -481,7 +486,7 @@ function limparForm() {
   renderTabela();
   cancelarEdicao();
 
-  ["destNome", "destCNPJ", "destContato", "destEndereco", "numPedido", "vendedor"].forEach((id) => {
+  ["destNome", "destCNPJ", "destEmail", "destContato", "destEndereco", "numPedido", "vendedor"].forEach((id) => {
     const el = document.getElementById(id);
     if (!el) return;
     el.value = "";

@@ -42,19 +42,22 @@ Campos (null se não encontrado):
   "numPedido": "número do pedido",
   "vendedor": "nome do vendedor",
   "frete": "FOB" ou "CIF",
-  "destNome": "razão social do cliente",
-  "destCNPJ": "CNPJ formatado",
-  "destContato": "contato e telefone",
-  "destEndereco": "endereço completo com CEP",
-  "equipamento": "descrição do produto",
-  "peso": null,
-  "volumes": "1",
-  "dimC": null,
-  "dimA": null,
-  "dimL": null,
-  "valorNF": "valor total como 0.000,00",
-  "numeroNF": null
-}`,
+  "destNome": "razão social ou nome do cliente",
+  "destCNPJ": "CNPJ ou CPF do cliente — procure no campo CNPJ, CPF ou Inscrição",
+  "destEmail": "email do cliente",
+  "destContato": "nome do contato e telefone separados por ponto ou barra",
+  "destEndereco": "endereço completo de entrega com CEP",
+  "itens": [
+    {
+      "equipamento": "descrição completa de UM produto/equipamento — NÃO junte produtos diferentes",
+      "qtd": "quantidade deste item",
+      "valorNF": "valor total deste item como 0.000,00",
+      "numeroNF": null
+    }
+  ]
+}
+
+IMPORTANTE: o campo itens deve ter UMA entrada por linha do pedido. Se o pedido tem 3 produtos, itens deve ter 3 objetos.`,
         messages: [
           {
             role: "user",
