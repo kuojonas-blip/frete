@@ -32,7 +32,7 @@ module.exports = async function handler(req, res) {
         "anthropic-beta": "pdfs-2024-09-25",
       },
       body: JSON.stringify({
-        model: "claude-opus-4-5",
+        model: "claude-haiku-4-5-20251001",
         max_tokens: 1000,
         system: `Extrai dados de pedidos de venda JK Equipamentos / Sinmag Brasil.
 Retorne SOMENTE JSON válido sem texto extra, backticks ou markdown.
