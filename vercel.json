@@ -1,7 +1,0 @@
-{
-  "functions": {
-    "api/extrair-pdf.js": {
-      "maxDuration": 30
-    }
-  }
-}
