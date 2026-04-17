@@ -270,6 +270,7 @@ async function processarPDF(file) {
   document.getElementById("pdfOk").style.display = "none";
 
   const base64 = await toBase64(file);
+  const pdfOk = document.getElementById("pdfOk");
 
   try {
     const res = await fetch("/api/extrair-pdf", {
@@ -277,14 +278,25 @@ async function processarPDF(file) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ base64 }),
     });
+
     const data = await res.json();
-    const text = data.content?.find((b) => b.type === "text")?.text || "{}";
+
+    // Mostra erro real da API se houver
+    if (data.error) {
+      throw new Error(data.error);
+    }
+
+    // Extrai texto da resposta
+    const text = data.content?.find((b) => b.type === "text")?.text;
+    if (!text) throw new Error("Resposta vazia da API");
+
     const fields = JSON.parse(text.replace(/```json|```/g, "").trim());
 
+    // Remetente e frete
     if (fields.remetente === "sinmag") setRemetente("sinmag"); else setRemetente("jk");
     if (fields.frete === "CIF") setFrete("CIF"); else setFrete("FOB");
 
-    // Preenche dados do destinatário
+    // Destinatário e referência
     ["numPedido", "vendedor", "destNome", "destCNPJ", "destContato", "destEndereco"].forEach((id) => {
       if (fields[id]) {
         const el = document.getElementById(id);
@@ -292,28 +304,43 @@ async function processarPDF(file) {
       }
     });
 
-    // Pré-preenche campos do equipamento para o usuário revisar e adicionar
-    ["equipamento", "peso", "volumes", "dimC", "dimA", "dimL", "valorNF", "numeroNF"].forEach((id) => {
-      if (fields[id]) {
-        const el = document.getElementById(id);
-        if (el) { el.value = fields[id]; el.classList.add("auto-filled"); }
-      }
-    });
+    // Se tem equipamento, adiciona direto na tabela
+    if (fields.equipamento) {
+      // Tenta preencher medidas do catálogo
+      const q = norm(fields.equipamento);
+      const match = EQUIPAMENTOS_CATALOGO.find(
+        (e) => q.includes(norm(e.modelo)) || norm(e.desc).includes(q)
+      );
 
-    setTimeout(() => { if (fields.equipamento) tentarAutoEquip(fields.equipamento); }, 100);
+      const item = {
+        desc:      fields.equipamento,
+        peso:      (match && match.peso) ? String(match.peso) : (fields.peso || ""),
+        volumes:   fields.volumes || "1",
+        dimC:      (match && match.c)    ? match.c : (fields.dimC || ""),
+        dimA:      (match && match.a)    ? match.a : (fields.dimA || ""),
+        dimL:      (match && match.l)    ? match.l : (fields.dimL || ""),
+        valorNF:   fields.valorNF || "",
+        numeroNF:  fields.numeroNF || "",
+        embalagem: "Caixa de madeira",
+        descarga:  "Com descarga",
+      };
 
-    const pdfOk = document.getElementById("pdfOk");
+      equipamentos.push(item);
+      renderTabela();
+    }
+
+    // Mensagem de sucesso
     pdfOk.style.cssText = "";
     document.getElementById("pdfOkText").textContent =
-      `Pedido nº ${fields.numPedido || "—"} lido. Confira os dados e clique em "Adicionar equipamento".`;
+      `✓ Pedido nº ${fields.numPedido || "—"} importado. Revise a tabela e complete o que faltar.`;
 
   } catch (err) {
-    console.error(err);
-    document.getElementById("pdfOkText").textContent = "⚠ Erro ao processar. Preencha manualmente.";
-    const pdfOk = document.getElementById("pdfOk");
+    console.error("Erro PDF:", err);
     pdfOk.style.background = "#fff1f2";
     pdfOk.style.borderColor = "#fca5a5";
     pdfOk.style.color = "#dc2626";
+    document.getElementById("pdfOkText").textContent = "⚠ " + (err.message || "Erro ao processar. Preencha manualmente.");
+    pdfZone.style.display = "block";
   }
 
   document.getElementById("loadingBar").style.display = "none";
