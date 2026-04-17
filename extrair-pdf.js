@@ -1,13 +1,25 @@
-export default async function handler(req, res) {
-  // Só aceita POST
+module.exports = async function handler(req, res) {
+  // CORS
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
+
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Método não permitido" });
   }
 
-  const { base64 } = req.body;
+  const { base64 } = req.body || {};
 
   if (!base64) {
     return res.status(400).json({ error: "base64 ausente" });
+  }
+
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return res.status(500).json({ error: "ANTHROPIC_API_KEY não configurada" });
   }
 
   try {
@@ -17,9 +29,10 @@ export default async function handler(req, res) {
         "Content-Type": "application/json",
         "x-api-key": process.env.ANTHROPIC_API_KEY,
         "anthropic-version": "2023-06-01",
+        "anthropic-beta": "pdfs-2024-09-25",
       },
       body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
+        model: "claude-opus-4-5",
         max_tokens: 1000,
         system: `Extrai dados de pedidos de venda JK Equipamentos / Sinmag Brasil.
 Retorne SOMENTE JSON válido sem texto extra, backticks ou markdown.
@@ -54,17 +67,24 @@ Campos (null se não encontrado):
                   data: base64,
                 },
               },
-              { type: "text", text: "Extraia os dados." },
+              { type: "text", text: "Extraia os dados deste pedido." },
             ],
           },
         ],
       }),
     });
 
+    if (!response.ok) {
+      const errText = await response.text();
+      console.error("Anthropic error:", response.status, errText);
+      return res.status(response.status).json({ error: errText });
+    }
+
     const data = await response.json();
     return res.status(200).json(data);
+
   } catch (err) {
-    console.error("Erro Anthropic:", err);
-    return res.status(500).json({ error: "Erro ao chamar API" });
+    console.error("Erro:", err);
+    return res.status(500).json({ error: err.message || "Erro interno" });
   }
-}
+};
