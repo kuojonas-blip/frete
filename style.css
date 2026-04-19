@@ -204,13 +204,130 @@ button.btn-wpp:hover { background: #1eb356; }
 .toast { position: fixed; bottom: 24px; right: 24px; background: #1f2937; color: white; border-radius: 8px; padding: 12px 20px; font-size: 13px; font-family: Arial, sans-serif; z-index: 999; transform: translateY(60px); opacity: 0; transition: all 0.3s; }
 .toast.show { transform: translateY(0); opacity: 1; }
 
-/* ── Responsivo ── */
+/* ══════════════════════════════════════════
+   MOBILE — até 640px
+══════════════════════════════════════════ */
 @media (max-width: 640px) {
-  .bloco, .bloco.col3 { grid-template-columns: 1fr; }
+
+  /* Layout geral */
+  body { padding: 0; }
+
+  .container {
+    padding: 16px 14px 40px;
+    border-radius: 0;
+    box-shadow: none;
+    min-height: 100vh;
+  }
+
+  h1 { font-size: 18px; margin-bottom: 20px; }
+  h2 { font-size: 12px; margin: 22px 0 12px; }
+
+  /* Logo menor */
+  .logo-sinmag { max-width: 160px; }
+  .topo-logo { margin-bottom: 12px; }
+
+  /* Grids viram coluna única */
+  .bloco,
+  .bloco.col3 { grid-template-columns: 1fr; gap: 0; }
   .span2 { grid-column: span 1; }
-  .toggle-group { flex-direction: column; }
-  .acoes { flex-direction: column; }
-  .container { padding: 16px; }
-  table { font-size: 11px; }
-  table th, table td { padding: 7px 6px; }
+
+  /* Inputs maiores para toque */
+  input[type="text"],
+  input[type="number"],
+  select,
+  textarea {
+    font-size: 16px; /* evita zoom automático no iOS */
+    padding: 12px;
+  }
+
+  /* Toggles em coluna */
+  .toggle-group { flex-direction: column; gap: 8px; }
+  .toggle-btn { padding: 13px; font-size: 14px; }
+
+  /* FOB / CIF lado a lado mas maior */
+  .fob-btn { padding: 12px 32px; font-size: 14px; }
+
+  /* Info box menor */
+  .info-box { font-size: 12px; padding: 10px 12px; }
+
+  /* Botão adicionar full width */
+  #btnAdicionarEquip {
+    width: 100%;
+    padding: 14px;
+    font-size: 15px;
+    margin-top: 8px;
+  }
+
+  /* ── Tabela vira cards no mobile ── */
+  table { font-size: 13px; }
+
+  table thead { display: none; } /* esconde cabeçalho */
+
+  table tbody tr {
+    display: block;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    padding: 12px;
+    background: white;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+
+  table tbody td {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border: none;
+    border-bottom: 1px solid #f3f4f6;
+    padding: 8px 0;
+    font-size: 13px;
+    gap: 8px;
+  }
+
+  table tbody td:last-child { border-bottom: none; padding-bottom: 0; }
+  table tbody td:first-child { padding-top: 0; }
+
+  /* Label fake via data-label */
+  table tbody td::before {
+    content: attr(data-label);
+    font-weight: 700;
+    color: #6b7280;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    min-width: 90px;
+    flex-shrink: 0;
+  }
+
+  /* Célula de ações em coluna */
+  table tbody td.td-acoes {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: flex-start;
+    padding-top: 10px;
+  }
+
+  table tbody td.td-acoes::before { display: none; }
+
+  .btn-mover { padding: 8px 12px; font-size: 13px; }
+  .btn-editar { padding: 8px 14px; font-size: 13px; }
+  .btn-remover { padding: 8px 14px; font-size: 13px; }
+
+  /* Botões de ação full width */
+  .acoes { flex-direction: column; gap: 10px; margin-top: 20px; }
+  button.btn-primary { width: 100%; padding: 14px; font-size: 15px; }
+  button.btn-ghost { width: 100%; padding: 13px; font-size: 15px; }
+
+  /* Preview */
+  .preview-body { font-size: 12px; padding: 14px; }
+  .preview-acoes { flex-direction: column; gap: 8px; padding: 12px 14px; }
+  button.btn-wpp { width: 100%; justify-content: center; padding: 14px; font-size: 15px; }
+  .preview-acoes .btn-ghost { width: 100%; padding: 13px; text-align: center; }
+
+  /* PDF zone */
+  .pdf-zone { padding: 24px 14px; }
+
+  /* Toast centralizado no mobile */
+  .toast { left: 16px; right: 16px; bottom: 16px; text-align: center; }
 }

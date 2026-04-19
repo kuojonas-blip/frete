@@ -185,14 +185,14 @@ function renderTabela() {
     if (editandoIndex === index) tr.classList.add("linha-editando");
 
     tr.innerHTML = `
-      <td>${item.desc}</td>
-      <td>${item.peso ? item.peso + " kg" : "—"}</td>
-      <td>${item.volumes}</td>
-      <td>${dimStr}</td>
-      <td>${item.valorNF ? "R$ " + item.valorNF : "—"}</td>
-      <td>${item.numeroNF || "—"}</td>
-      <td>${item.embalagem}</td>
-      <td>${item.descarga}</td>
+      <td data-label="Equipamento">${item.desc}</td>
+      <td data-label="Peso">${item.peso ? item.peso + " kg" : "—"}</td>
+      <td data-label="Vol.">${item.volumes}</td>
+      <td data-label="Dimensões">${dimStr}</td>
+      <td data-label="Valor NF">${item.valorNF ? "R$ " + item.valorNF : "—"}</td>
+      <td data-label="NF nº">${item.numeroNF || "—"}</td>
+      <td data-label="Embalagem">${item.embalagem}</td>
+      <td data-label="Descarga">${item.descarga}</td>
       <td class="td-acoes">
         <button type="button" class="btn-mover"
           onclick="moverEquip(${index}, -1)"
